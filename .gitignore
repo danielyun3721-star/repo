@@ -1,0 +1,45 @@
+# Git 폴더 (사용자 요청)
+Git/
+.git_backup/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 가상환경
+venv/
+env/
+ENV/
+.venv
+
+# 데이터 및 백업
+backups/
+logs/
+raw_data.xlsx
+!sample_data.xlsx
+
+# 개인 파일
+token github.txt
+test.txt
+프롬프트.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Claude 설정
+.claude/
+
+# 기타
+repo/
