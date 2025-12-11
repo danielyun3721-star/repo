@@ -42,7 +42,7 @@ try:
         with col1:
             # 날짜 필터
             if '발행 일자' in df_original.columns:
-                df_original['발행 일자'] = pd.to_datetime(df_original['발행 일자'])
+                df_original['발행 일자'] = pd.to_datetime(df_original['발행 일자'], errors='coerce')
                 min_date = df_original['발행 일자'].min().date()
                 max_date = df_original['발행 일자'].max().date()
 
@@ -148,7 +148,12 @@ try:
 
                 # TSV 파일 업데이트
                 try:
-                    # 전체 데이터에 변경사항 반영 (간단한 방법: 전체 데이터 교체)
+                    # 날짜 형식 정규화
+                    if '발행 일자' in edited_df.columns:
+                        edited_df['발행 일자'] = pd.to_datetime(edited_df['발행 일자'], errors='coerce')
+                        edited_df['발행 일자'] = edited_df['발행 일자'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+                    # 전체 데이터에 변경사항 반영
                     edited_df.to_csv(config.DATA_PATH, sep='\t', index=False, encoding='cp949')
 
                     # 변경 로그 기록

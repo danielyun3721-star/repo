@@ -41,7 +41,11 @@ def validate_input(data):
         발행_일자 = data['발행 일자']
         if isinstance(발행_일자, str):
             try:
-                발행_일자 = datetime.strptime(발행_일자, '%Y-%m-%d').date()
+                # 두 가지 형식 모두 지원: 'YYYY-MM-DD' 또는 'YYYY-MM-DD HH:MM:SS'
+                if len(발행_일자) == 10:  # 'YYYY-MM-DD'
+                    발행_일자 = datetime.strptime(발행_일자, '%Y-%m-%d').date()
+                else:  # 'YYYY-MM-DD HH:MM:SS'
+                    발행_일자 = datetime.strptime(발행_일자, '%Y-%m-%d %H:%M:%S').date()
             except ValueError:
                 return False, "발행 일자 형식이 올바르지 않습니다"
 

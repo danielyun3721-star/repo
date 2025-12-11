@@ -195,7 +195,7 @@ def render_input_form(df):
         if submitted:
             # 데이터 구성
             new_data = {
-                '발행 일자': 발행_일자,
+                '발행 일자': datetime.combine(발행_일자, datetime.min.time()).strftime('%Y-%m-%d %H:%M:%S'),
                 '콘텐츠 분류': 콘텐츠_분류,
                 '배포 방식': 배포_방식,
                 '대상': 대상 if 대상 else '',
