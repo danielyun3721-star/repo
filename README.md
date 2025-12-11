@@ -4,6 +4,8 @@ Streamlit 기반 커뮤니케이션 제작물 성과 분석 및 벤치마킹 대
 
 사내 커뮤니케이션 결과 데이터를 분석하고, 신규 데이터 추가 시 과거 데이터 대비 위치/수준을 실시간 모니터링할 수 있습니다.
 
+> **Note**: 삼성전자 사내 보안 정책을 준수하기 위해 Excel(.xlsx) 대신 TSV(.txt) 형식을 사용합니다.
+
 ## 주요 기능
 
 - 📊 **전체 성과 분석**: 월별 트렌드, 채널 효율성, 주제별 분포 분석
@@ -29,8 +31,13 @@ python -m pip install -r requirements.txt
 
 ### 3. 데이터 파일 준비
 
-1. `sample_data.xlsx` 파일을 `raw_data.xlsx`로 이름 변경하거나
-2. 동일한 구조의 실제 데이터를 `raw_data.xlsx` 파일로 준비하세요
+1. `sample_data.txt` 파일을 `raw_data.txt`로 이름 변경하거나
+2. 동일한 구조의 실제 데이터를 `raw_data.txt` 파일로 준비하세요
+
+**파일 형식**: TSV (Tab-Separated Values, .txt 확장자)
+- 구분자: 탭 (`\t`)
+- 인코딩: cp949 (한글 지원)
+- 첫 줄: 컬럼명 헤더 포함
 
 **필수 컬럼**:
 - 발행 일자
@@ -63,7 +70,7 @@ python -m streamlit run app.py
 ├── app.py                  # 메인 애플리케이션
 ├── config.py              # 설정 파일
 ├── requirements.txt       # 패키지 의존성
-├── sample_data.xlsx       # 샘플 데이터 (참고용)
+├── sample_data.txt        # 샘플 데이터 (TSV 형식, 참고용)
 ├── analysis/             # 분석 모듈
 ├── components/           # UI 컴포넌트
 ├── data/                 # 데이터 처리 모듈
@@ -86,7 +93,7 @@ python -m streamlit run app.py
 1. "Add New Data" 페이지 선택
 2. 폼에 데이터 입력 (필수 항목 *표시)
 3. "데이터 추가" 버튼 클릭
-4. 자동으로 Excel 파일에 저장 및 백업 생성
+4. 자동으로 TSV 파일에 저장 및 백업 생성
 5. 페이지 새로고침하여 업데이트된 데이터 확인
 
 ### 벤치마킹
@@ -110,15 +117,21 @@ python -m streamlit run app.py
 ## 백업 관리
 
 - 데이터 추가/수정 시 자동으로 `backups/` 폴더에 백업 파일 생성
-- 백업 파일명 형식: `raw_data_backup_YYYYMMDD_HHMMSS.xlsx`
+- 백업 파일명 형식: `raw_data_backup_YYYYMMDD_HHMMSS.txt` (TSV 형식)
 - 정기적으로 오래된 백업 파일 정리 권장
 
 ## 문제 해결
 
 ### 데이터가 표시되지 않을 때
-- `raw_data.xlsx` 파일이 프로젝트 루트에 있는지 확인
-- 파일 형식이 올바른지 확인 (Excel .xlsx)
+- `raw_data.txt` 파일이 프로젝트 루트에 있는지 확인
+- 파일 형식이 올바른지 확인 (TSV, 탭 구분자)
+- 파일 인코딩이 cp949 또는 UTF-8인지 확인
 - 필수 컬럼이 모두 포함되어 있는지 확인
+
+### 한글이 깨져 보일 때
+- 파일 인코딩을 cp949로 저장했는지 확인
+- Excel에서 저장 시 "텍스트(탭으로 분리)(*.txt)" 형식 사용
+- 메모장에서 열어 확인 시 "ANSI" 또는 "UTF-8" 인코딩 확인
 
 ### 성능이 느릴 때
 - 브라우저 캐시 삭제
@@ -127,13 +140,32 @@ python -m streamlit run app.py
 
 ### 신규 데이터 추가가 안 될 때
 - 필수 항목이 모두 입력되었는지 확인
-- Excel 파일이 다른 프로그램에서 열려있지 않은지 확인
+- TSV 파일이 다른 프로그램에서 열려있지 않은지 확인
 - 쓰기 권한이 있는지 확인
 
 ## 기술 스택
 
 - **Python 3.x**
 - **Streamlit**: 웹 애플리케이션 프레임워크
-- **Pandas**: 데이터 처리
-- **Plotly**: 인터랙티브 차트
-- **OpenPyXL**: Excel 파일 처리
+- **Pandas**: 데이터 처리 및 TSV 파일 I/O
+- **Matplotlib & Seaborn**: 데이터 시각화
+- **NumPy & SciPy**: 통계 분석
+
+## 변경 이력
+
+### v2.0 (2024-12-11)
+- **Excel에서 TSV 형식으로 마이그레이션**
+  - 삼성전자 사내 보안 정책 준수를 위한 변경
+  - `.xlsx` → `.txt` (TSV 형식)
+  - cp949 인코딩 지원으로 한글 호환성 확보
+  - UTF-8 폴백 메커니즘 추가
+
+- **시각화 라이브러리 변경**
+  - Plotly → Matplotlib/Seaborn
+  - 사내 보안 환경에서의 차트 표시 문제 해결
+  - Streamlit 네이티브 인터랙티브 기능 활용
+
+### v1.0 (2024-12-10)
+- 초기 버전 릴리스
+- Excel 기반 데이터 관리
+- Plotly 기반 시각화

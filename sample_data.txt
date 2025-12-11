@@ -1,0 +1,16 @@
+발행 일자	콘텐츠 분류	배포 방식	대상	주제 분류	제목	담당자	콘텐츠 링크	이벤트 유무	조회수	댓글수	좋아요수	댓글 리스트	AI포털 방문자수
+2024-07-28	뉴스레터	AI포털, 뉴스레터	전사	N-PLM	샘플 콘텐츠 제목 1	정주호	https://example.com/content1	ㅇ	5155	1	87		1824
+2024-03-12	티저이미지	나우 팝업	N-PLM 사용자	IAM	샘플 콘텐츠 제목 2	정주호	https://example.com/content2	ㅇ	5053	2	205		1586
+2024-10-17	브랜딩	메일, 챗봇, AI포털	전사	AI포털	샘플 콘텐츠 제목 3	정주호	https://example.com/content3	ㅇ	4350	65	298		917
+2024-09-06	브랜딩	나우 팝업	N-PLM 사용자	Gen.AI	샘플 콘텐츠 제목 4	정주호	https://example.com/content4	X	7298	60	247		166
+2024-07-04	기사	나우 핀고정	N-PLM 사용자	Gen.AI	샘플 콘텐츠 제목 5	윤시현	https://example.com/content5	X	1252	24	195		741
+2024-11-07	뉴스레터	AI포털, 뉴스레터	N-PLM 사용자	Gen.AI	샘플 콘텐츠 제목 6	정주호	https://example.com/content6	ㅇ	1229	52	114		516
+2024-07-16	티저이미지	DS Assistant 내 팝업	전사	시리즈 인터뷰	샘플 콘텐츠 제목 7	최민준	https://example.com/content7	ㅇ	9596	22	490		1089
+2024-11-27	브랜딩	나우 팝업	전사	Gen.AI	샘플 콘텐츠 제목 8	최민준	https://example.com/content8	ㅇ	2048	74	5		1471
+2024-12-24	브랜딩	메일, 챗봇, AI포털	N-PLM 사용자	BP Festival	샘플 콘텐츠 제목 9	윤시현	https://example.com/content9	X	6202	55	49		1444
+2024-09-25	티저이미지	메일, 챗봇, AI포털	전사	디디업	샘플 콘텐츠 제목 10	오주연	https://example.com/content10	ㅇ	1015	31	372		618
+2024-01-25	기사	메일, 나우 핀고정	전사	시리즈 인터뷰	샘플 콘텐츠 제목 11	정주호	https://example.com/content11	X	7876	88	39		704
+2024-02-14	브랜딩	ELV/DID, CATV	전사	시리즈 인터뷰	샘플 콘텐츠 제목 12	최민준	https://example.com/content12	ㅇ	6608	55	58		1443
+2024-08-31	포스터	메일	전사	IAM	샘플 콘텐츠 제목 13	윤시현	https://example.com/content13	X	5576	80	299		967
+2024-04-11	티저이미지	나우 팝업, ELV/DID, CATV	전사	Gen.AI	샘플 콘텐츠 제목 14	오주연	https://example.com/content14	ㅇ	2492	82	144		1515
+2024-08-24	티저이미지	메일, 나우 핀고정	전사	Data	샘플 콘텐츠 제목 15	오주연	https://example.com/content15	X	2151	0	140		972
