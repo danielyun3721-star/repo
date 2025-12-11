@@ -15,6 +15,7 @@ from analysis.trends import calculate_monthly_engagement, calculate_quarterly_en
 from visualization.charts import create_monthly_trend_chart, create_bar_chart, create_pie_chart, create_line_chart_with_markers, create_time_series_area_chart
 from components.filters import render_date_filter, render_multiselect_filters, apply_filters
 from components.export import render_download_buttons
+import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="대시보드", page_icon="📊", layout="wide")
 
@@ -118,20 +119,22 @@ try:
         monthly_data = calculate_monthly_engagement(filtered_df)
 
         if not monthly_data.empty:
-            chart = create_monthly_trend_chart(monthly_data)
-            st.plotly_chart(chart, use_container_width=True)
+            fig = create_monthly_trend_chart(monthly_data)
+            st.pyplot(fig, use_container_width=True)
+            plt.close(fig)
 
             # 성장률 분석
             with st.expander("📊 월별 성장률 분석"):
                 monthly_with_growth = calculate_growth_rate(monthly_data, '월')
 
-                growth_chart = create_line_chart_with_markers(
+                growth_fig = create_line_chart_with_markers(
                     monthly_with_growth,
                     '월',
                     ['조회수_성장률', '댓글수_성장률', '좋아요수_성장률'],
                     '월별 성장률 (%)'
                 )
-                st.plotly_chart(growth_chart, use_container_width=True)
+                st.pyplot(growth_fig, use_container_width=True)
+                plt.close(growth_fig)
 
                 # 상세 데이터 테이블
                 st.dataframe(monthly_with_growth, use_container_width=True)
@@ -144,13 +147,14 @@ try:
         quarterly_data = calculate_quarterly_engagement(filtered_df)
 
         if not quarterly_data.empty:
-            chart = create_line_chart_with_markers(
+            quarter_fig = create_line_chart_with_markers(
                 quarterly_data,
                 '분기',
                 ['조회수', '댓글수', '좋아요수'],
                 '분기별 참여도 추이'
             )
-            st.plotly_chart(chart, use_container_width=True)
+            st.pyplot(quarter_fig, use_container_width=True)
+            plt.close(quarter_fig)
 
             with st.expander("분기별 상세 데이터"):
                 st.dataframe(quarterly_data, use_container_width=True)
@@ -168,8 +172,9 @@ try:
             channel_counts = filtered_df['배포 방식'].value_counts().reset_index()
             channel_counts.columns = ['배포 방식', '게시물 수']
 
-            chart = create_pie_chart(channel_counts, '배포 방식', '게시물 수', '배포 방식별 게시물 분포')
-            st.plotly_chart(chart, use_container_width=True)
+            channel_fig = create_pie_chart(channel_counts, '배포 방식', '게시물 수', '배포 방식별 게시물 분포')
+            st.pyplot(channel_fig, use_container_width=True)
+            plt.close(channel_fig)
 
     with col_right:
         st.subheader("📊 주제별 게시물 수")
@@ -177,8 +182,9 @@ try:
             topic_counts = filtered_df['주제 분류'].value_counts().reset_index()
             topic_counts.columns = ['주제 분류', '게시물 수']
 
-            chart = create_pie_chart(topic_counts, '주제 분류', '게시물 수', '주제별 게시물 분포')
-            st.plotly_chart(chart, use_container_width=True)
+            topic_fig = create_pie_chart(topic_counts, '주제 분류', '게시물 수', '주제별 게시물 분포')
+            st.pyplot(topic_fig, use_container_width=True)
+            plt.close(topic_fig)
 
     st.markdown("---")
 
@@ -196,13 +202,14 @@ try:
 
         with col1:
             # 조회수 시계열 차트
-            views_chart = create_time_series_area_chart(
+            views_fig = create_time_series_area_chart(
                 monthly_stats,
                 '월',
                 '조회수',
                 '월별 조회수 추이'
             )
-            st.plotly_chart(views_chart, use_container_width=True)
+            st.pyplot(views_fig, use_container_width=True)
+            plt.close(views_fig)
 
         with col2:
             # 참여도 (댓글수 + 좋아요수) 시계열 차트
@@ -210,13 +217,14 @@ try:
                 monthly_stats_copy = monthly_stats.copy()
                 monthly_stats_copy['참여도'] = monthly_stats_copy['댓글수'] + monthly_stats_copy['좋아요수']
 
-                engagement_chart = create_time_series_area_chart(
+                engagement_fig = create_time_series_area_chart(
                     monthly_stats_copy,
                     '월',
                     '참여도',
                     '월별 참여도 추이 (댓글+좋아요)'
                 )
-                st.plotly_chart(engagement_chart, use_container_width=True)
+                st.pyplot(engagement_fig, use_container_width=True)
+                plt.close(engagement_fig)
     else:
         # 차트를 그릴 수 없는 경우 기존 텍스트 통계 표시
         col1, col2 = st.columns(2)

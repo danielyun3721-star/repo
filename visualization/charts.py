@@ -1,8 +1,8 @@
 """
-차트 생성 모듈
+차트 생성 모듈 - Matplotlib/Seaborn 버전
 """
-import plotly.graph_objects as go
-import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 import config
 
@@ -15,54 +15,35 @@ def create_monthly_trend_chart(monthly_data):
         monthly_data (pd.DataFrame): 월별 집계 데이터
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if monthly_data.empty:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
-    fig = go.Figure()
+    fig, ax = plt.subplots(figsize=(12, 6))
 
-    # 조회수
-    fig.add_trace(go.Scatter(
-        x=monthly_data['월'],
-        y=monthly_data['조회수'],
-        name='조회수',
-        line=dict(color=config.COLOR_PALETTE['primary'], width=3),
-        mode='lines+markers'
-    ))
+    # 라인 플롯
+    ax.plot(monthly_data['월'], monthly_data['조회수'],
+            marker='o', linewidth=2.5, label='조회수',
+            color=config.COLOR_PALETTE['primary'], markersize=8)
+    ax.plot(monthly_data['월'], monthly_data['댓글수'],
+            marker='s', linewidth=2.5, label='댓글수',
+            color=config.COLOR_PALETTE['secondary'], markersize=8)
+    ax.plot(monthly_data['월'], monthly_data['좋아요수'],
+            marker='^', linewidth=2.5, label='좋아요수',
+            color=config.COLOR_PALETTE['tertiary'], markersize=8)
 
-    # 댓글수
-    fig.add_trace(go.Scatter(
-        x=monthly_data['월'],
-        y=monthly_data['댓글수'],
-        name='댓글수',
-        line=dict(color=config.COLOR_PALETTE['secondary'], width=3),
-        mode='lines+markers'
-    ))
+    # 스타일링
+    ax.set_title('월별 참여도 추이', fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel('월', fontsize=11)
+    ax.set_ylabel('건수', fontsize=11)
+    ax.legend(loc='upper left', ncol=3, frameon=True, shadow=True)
+    ax.grid(True, alpha=0.3)
 
-    # 좋아요수
-    fig.add_trace(go.Scatter(
-        x=monthly_data['월'],
-        y=monthly_data['좋아요수'],
-        name='좋아요수',
-        line=dict(color=config.COLOR_PALETTE['tertiary'], width=3),
-        mode='lines+markers'
-    ))
-
-    fig.update_layout(
-        title='월별 참여도 추이',
-        xaxis_title='월',
-        yaxis_title='건수',
-        hovermode='x unified',
-        template='plotly_white',
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        )
-    )
+    # X축 라벨 회전
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
 
     return fig
 
@@ -76,33 +57,43 @@ def create_efficiency_scatter(df, color_discrete_sequence=None):
         color_discrete_sequence (list, optional): 색상 팔레트
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if df.empty:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
-    fig = px.scatter(
-        df,
-        x='조회수',
-        y='댓글수',
-        color='배포 방식' if '배포 방식' in df.columns else None,
-        size='좋아요수' if '좋아요수' in df.columns else None,
-        hover_data=['제목', '주제 분류'] if '제목' in df.columns else None,
-        title='채널 효율성: 조회수 vs 댓글수',
-        labels={'조회수': '조회수', '댓글수': '댓글수'},
-        color_discrete_sequence=color_discrete_sequence
-    )
+    fig, ax = plt.subplots(figsize=(12, 8))
 
-    fig.update_traces(marker=dict(opacity=0.7, line=dict(width=1, color='white')))
-    fig.update_layout(
-        template='plotly_white',
-        height=700  # 높이 증가
-    )
+    # 색상 팔레트 설정
+    if color_discrete_sequence:
+        colors = color_discrete_sequence
+    else:
+        colors = sns.color_palette('Set2', n_colors=len(df['배포 방식'].unique()))
 
-    # Y축 범위 조정 (0부터 시작)
-    if '댓글수' in df.columns:
-        fig.update_yaxes(range=[0, df['댓글수'].max() * 1.1])
+    # 배포 방식별로 그룹화하여 플롯
+    for idx, (channel, group) in enumerate(df.groupby('배포 방식')):
+        scatter = ax.scatter(
+            group['조회수'],
+            group['댓글수'],
+            s=group['좋아요수'] * 10 if '좋아요수' in group.columns else 100,  # 버블 크기 조정
+            alpha=0.7,
+            color=colors[idx % len(colors)],
+            edgecolors='white',
+            linewidth=1,
+            label=channel
+        )
 
+    ax.set_title('채널 효율성: 조회수 vs 댓글수', fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel('조회수', fontsize=11)
+    ax.set_ylabel('댓글수', fontsize=11)
+    ax.legend(title='배포 방식', frameon=True, shadow=True)
+    ax.grid(True, alpha=0.3)
+
+    # Y축 0부터 시작
+    ax.set_ylim(bottom=0)
+
+    plt.tight_layout()
     return fig
 
 
@@ -115,26 +106,30 @@ def create_topic_distribution_box(df, color_discrete_sequence=None):
         color_discrete_sequence (list, optional): 색상 팔레트
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if df.empty or '주제 분류' not in df.columns:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
-    fig = px.box(
-        df,
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Seaborn boxplot
+    sns.boxplot(
+        data=df,
         x='주제 분류',
         y='조회수',
-        color='주제 분류',
-        title='주제별 조회수 분포',
-        labels={'주제 분류': '주제', '조회수': '조회수'},
-        color_discrete_sequence=color_discrete_sequence
+        palette=color_discrete_sequence if color_discrete_sequence else 'Set2',
+        ax=ax
     )
 
-    fig.update_layout(
-        showlegend=False,
-        template='plotly_white'
-    )
+    ax.set_title('주제별 조회수 분포', fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel('주제', fontsize=11)
+    ax.set_ylabel('조회수', fontsize=11)
+    plt.xticks(rotation=45, ha='right')
+    ax.grid(True, axis='y', alpha=0.3)
 
+    plt.tight_layout()
     return fig
 
 
@@ -147,46 +142,65 @@ def create_impact_matrix(df, color_by='콘텐츠 분류'):
         color_by (str): 색상 구분 기준 컬럼명
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if df.empty or '조회수_zscore' not in df.columns:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
+
+    fig, ax = plt.subplots(figsize=(12, 8))
 
     # 색상 매핑 (사분면인 경우만 특수 색상)
     if color_by == '사분면':
-        color_discrete_map = {
+        color_map = {
             '높은 영향력': '#2ca02c',
             '높은 도달, 낮은 참여': '#1f77b4',
             '낮은 도달, 높은 참여': '#ff7f0e',
             '낮은 영향력': '#d62728'
         }
+        for quadrant, color in color_map.items():
+            mask = df['quadrant'] == quadrant
+            if mask.any():
+                ax.scatter(
+                    df.loc[mask, '조회수_zscore'],
+                    df.loc[mask, '댓글수_zscore'],
+                    c=color,
+                    label=quadrant,
+                    alpha=0.7,
+                    s=100,
+                    edgecolors='white',
+                    linewidth=1
+                )
     else:
-        color_discrete_map = None  # Plotly 기본 색상 사용
-
-    fig = px.scatter(
-        df,
-        x='조회수_zscore',
-        y='댓글수_zscore',
-        color=color_by if color_by in df.columns or color_by == '사분면' else 'quadrant',
-        hover_data=['제목', '배포 방식', '주제 분류', '콘텐츠 분류'] if '제목' in df.columns else None,
-        title=f'Impact Matrix (색상: {color_by})',
-        labels={
-            '조회수_zscore': '조회수 (Z-Score)',
-            '댓글수_zscore': '댓글수 (Z-Score)'
-        },
-        color_discrete_map=color_discrete_map
-    )
+        # 다른 컬럼으로 색상 구분
+        if color_by in df.columns:
+            categories = df[color_by].unique()
+            colors = sns.color_palette('Set2', n_colors=len(categories))
+            for idx, category in enumerate(categories):
+                mask = df[color_by] == category
+                if mask.any():
+                    ax.scatter(
+                        df.loc[mask, '조회수_zscore'],
+                        df.loc[mask, '댓글수_zscore'],
+                        c=[colors[idx]],
+                        label=category,
+                        alpha=0.7,
+                        s=100,
+                        edgecolors='white',
+                        linewidth=1
+                    )
 
     # 기준선 추가
-    fig.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.5)
-    fig.add_vline(x=0, line_dash="dash", line_color="gray", opacity=0.5)
+    ax.axhline(y=0, linestyle='--', color='gray', alpha=0.5, linewidth=1.5)
+    ax.axvline(x=0, linestyle='--', color='gray', alpha=0.5, linewidth=1.5)
 
-    fig.update_traces(marker=dict(size=10, opacity=0.7, line=dict(width=1, color='white')))
-    fig.update_layout(
-        template='plotly_white',
-        height=700  # 높이 증가
-    )
+    ax.set_title(f'Impact Matrix (색상: {color_by})', fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel('조회수 (Z-Score)', fontsize=11)
+    ax.set_ylabel('댓글수 (Z-Score)', fontsize=11)
+    ax.legend(title=color_by, frameon=True, shadow=True)
+    ax.grid(True, alpha=0.3)
 
+    plt.tight_layout()
     return fig
 
 
@@ -203,27 +217,58 @@ def create_bar_chart(df, x_col, y_col, title, color_col=None, color_discrete_seq
         color_discrete_sequence (list, optional): 색상 팔레트
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if df.empty:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
-    fig = px.bar(
-        df,
-        x=x_col,
-        y=y_col,
-        color=color_col,
-        title=title,
-        text=y_col,
-        color_discrete_sequence=color_discrete_sequence
-    )
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
-    fig.update_layout(
-        template='plotly_white',
-        showlegend=True if color_col else False
-    )
+    if color_col and color_col in df.columns:
+        # 색상 구분이 있는 경우
+        categories = df[color_col].unique()
+        colors = color_discrete_sequence if color_discrete_sequence else sns.color_palette('Set2', n_colors=len(categories))
 
+        # 그룹별로 막대 그리기
+        x_positions = range(len(df))
+        for idx, category in enumerate(categories):
+            mask = df[color_col] == category
+            if mask.any():
+                ax.bar(
+                    [x for x, m in zip(x_positions, mask) if m],
+                    df.loc[mask, y_col],
+                    color=colors[idx % len(colors)],
+                    label=category,
+                    alpha=0.8
+                )
+    else:
+        # 단일 색상
+        bars = ax.bar(range(len(df)), df[y_col], color=config.COLOR_PALETTE['primary'], alpha=0.8)
+
+    # 값 레이블 추가
+    for idx, row in df.iterrows():
+        value = row[y_col]
+        x_pos = list(df.index).index(idx) if idx in df.index else idx
+        # 값이 숫자인 경우에만 표시
+        if pd.notna(value):
+            ax.text(x_pos, value, f'{value:.0f}',
+                    ha='center', va='bottom', fontsize=9)
+
+    ax.set_title(title, fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel(x_col, fontsize=11)
+    ax.set_ylabel(y_col, fontsize=11)
+
+    # X축 레이블 설정
+    ax.set_xticks(range(len(df)))
+    ax.set_xticklabels(df[x_col], rotation=45, ha='right')
+
+    if color_col:
+        ax.legend(frameon=True, shadow=True)
+
+    ax.grid(True, axis='y', alpha=0.3)
+
+    plt.tight_layout()
     return fig
 
 
@@ -238,21 +283,33 @@ def create_pie_chart(df, names_col, values_col, title):
         title (str): 차트 제목
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if df.empty:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
-    fig = px.pie(
-        df,
-        names=names_col,
-        values=values_col,
-        title=title
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    colors = sns.color_palette('Set2', n_colors=len(df))
+
+    wedges, texts, autotexts = ax.pie(
+        df[values_col],
+        labels=df[names_col],
+        colors=colors,
+        autopct='%1.1f%%',
+        startangle=90,
+        textprops={'fontsize': 10}
     )
 
-    fig.update_traces(textposition='inside', textinfo='percent+label')
-    fig.update_layout(template='plotly_white')
+    # 퍼센트 텍스트 스타일
+    for autotext in autotexts:
+        autotext.set_color('white')
+        autotext.set_fontweight('bold')
 
+    ax.set_title(title, fontsize=14, fontweight='bold', pad=15)
+
+    plt.tight_layout()
     return fig
 
 
@@ -268,29 +325,32 @@ def create_heatmap(df, x_col, y_col, z_col, title):
         title (str): 차트 제목
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if df.empty:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
     # 피벗 테이블 생성
     pivot_table = df.pivot_table(values=z_col, index=y_col, columns=x_col, aggfunc='sum')
 
-    fig = go.Figure(data=go.Heatmap(
-        z=pivot_table.values,
-        x=pivot_table.columns,
-        y=pivot_table.index,
-        colorscale='Blues',
-        text=pivot_table.values,
-        texttemplate='%{text:.0f}',
-        textfont={"size": 10}
-    ))
+    fig, ax = plt.subplots(figsize=(12, 8))
 
-    fig.update_layout(
-        title=title,
-        template='plotly_white'
+    sns.heatmap(
+        pivot_table,
+        cmap='Blues',
+        annot=True,
+        fmt='.0f',
+        linewidths=0.5,
+        cbar_kws={'label': z_col},
+        ax=ax
     )
 
+    ax.set_title(title, fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel(x_col, fontsize=11)
+    ax.set_ylabel(y_col, fontsize=11)
+
+    plt.tight_layout()
     return fig
 
 
@@ -305,39 +365,37 @@ def create_line_chart_with_markers(df, x_col, y_cols, title):
         title (str): 차트 제목
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if df.empty:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
-    fig = go.Figure()
+    fig, ax = plt.subplots(figsize=(12, 6))
 
     colors = list(config.COLOR_PALETTE.values())
+    markers = ['o', 's', '^', 'D', 'v', '<', '>', 'p']
 
     for idx, y_col in enumerate(y_cols):
         if y_col in df.columns:
-            fig.add_trace(go.Scatter(
-                x=df[x_col],
-                y=df[y_col],
-                name=y_col,
-                line=dict(color=colors[idx % len(colors)], width=2),
-                mode='lines+markers'
-            ))
+            ax.plot(
+                df[x_col],
+                df[y_col],
+                marker=markers[idx % len(markers)],
+                linewidth=2,
+                label=y_col,
+                color=colors[idx % len(colors)],
+                markersize=8
+            )
 
-    fig.update_layout(
-        title=title,
-        xaxis_title=x_col,
-        yaxis_title='값',
-        hovermode='x unified',
-        template='plotly_white',
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        )
-    )
+    ax.set_title(title, fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel(x_col, fontsize=11)
+    ax.set_ylabel('값', fontsize=11)
+    ax.legend(loc='upper left', ncol=3, frameon=True, shadow=True)
+    ax.grid(True, alpha=0.3)
+
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
 
     return fig
 
@@ -353,59 +411,71 @@ def create_time_series_area_chart(df, x_col, y_col, title):
         title (str): 차트 제목
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if df.empty or y_col not in df.columns:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
-    fig = go.Figure()
+    fig, ax = plt.subplots(figsize=(12, 6))
 
     # 영역 차트
-    fig.add_trace(go.Scatter(
-        x=df[x_col],
-        y=df[y_col],
-        name=y_col,
-        fill='tozeroy',
-        line=dict(color=config.COLOR_PALETTE['primary'], width=2),
-        fillcolor='rgba(31, 119, 180, 0.3)',
-        mode='lines+markers'
-    ))
+    ax.fill_between(
+        range(len(df)),
+        df[y_col],
+        alpha=0.3,
+        color=config.COLOR_PALETTE['primary']
+    )
+    ax.plot(
+        range(len(df)),
+        df[y_col],
+        marker='o',
+        linewidth=2,
+        color=config.COLOR_PALETTE['primary'],
+        markersize=8
+    )
 
-    # 최고/최저 표시
+    # 최고/최저 주석
     max_idx = df[y_col].idxmax()
     min_idx = df[y_col].idxmin()
 
-    fig.add_annotation(
-        x=df.loc[max_idx, x_col],
-        y=df.loc[max_idx, y_col],
-        text=f"최고: {df.loc[max_idx, y_col]:,.0f}",
-        showarrow=True,
-        arrowhead=2,
-        arrowcolor="green",
-        bgcolor="lightgreen",
-        opacity=0.8
+    max_x_pos = list(df.index).index(max_idx)
+    max_y = df.loc[max_idx, y_col]
+    min_x_pos = list(df.index).index(min_idx)
+    min_y = df.loc[min_idx, y_col]
+
+    # 최고점 주석
+    ax.annotate(
+        f'최고: {max_y:,.0f}',
+        xy=(max_x_pos, max_y),
+        xytext=(10, 10),
+        textcoords='offset points',
+        fontsize=10,
+        bbox=dict(boxstyle='round,pad=0.5', fc='lightgreen', alpha=0.8),
+        arrowprops=dict(arrowstyle='->', color='green', lw=1.5)
     )
 
-    fig.add_annotation(
-        x=df.loc[min_idx, x_col],
-        y=df.loc[min_idx, y_col],
-        text=f"최저: {df.loc[min_idx, y_col]:,.0f}",
-        showarrow=True,
-        arrowhead=2,
-        arrowcolor="red",
-        bgcolor="lightcoral",
-        opacity=0.8
+    # 최저점 주석
+    ax.annotate(
+        f'최저: {min_y:,.0f}',
+        xy=(min_x_pos, min_y),
+        xytext=(10, -20),
+        textcoords='offset points',
+        fontsize=10,
+        bbox=dict(boxstyle='round,pad=0.5', fc='lightcoral', alpha=0.8),
+        arrowprops=dict(arrowstyle='->', color='red', lw=1.5)
     )
 
-    fig.update_layout(
-        title=title,
-        xaxis_title=x_col,
-        yaxis_title=y_col,
-        hovermode='x unified',
-        template='plotly_white',
-        showlegend=False
-    )
+    ax.set_title(title, fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel(x_col, fontsize=11)
+    ax.set_ylabel(y_col, fontsize=11)
+    ax.grid(True, alpha=0.3)
 
+    # X축 레이블 설정
+    ax.set_xticks(range(len(df)))
+    ax.set_xticklabels(df[x_col], rotation=45, ha='right')
+
+    plt.tight_layout()
     return fig
 
 
@@ -420,51 +490,53 @@ def create_benchmark_position_chart(historical_df, selected_value, metric, title
         title (str): 차트 제목
 
     Returns:
-        go.Figure: Plotly 차트 객체
+        matplotlib.figure.Figure: Matplotlib Figure 객체
     """
     if historical_df.empty or metric not in historical_df.columns:
-        return go.Figure()
+        fig, ax = plt.subplots()
+        return fig
 
-    fig = go.Figure()
+    fig, ax = plt.subplots(figsize=(12, 5))
 
-    # 히스토그램 (전체 데이터 분포)
-    fig.add_trace(go.Histogram(
-        x=historical_df[metric],
-        name='전체 데이터 분포',
-        marker_color='lightblue',
-        opacity=0.7,
-        nbinsx=30
-    ))
-
-    # 현재 게시물 위치 (수직선)
-    fig.add_vline(
-        x=selected_value,
-        line_dash="dash",
-        line_color="red",
-        line_width=3,
-        annotation_text=f"현재 게시물: {selected_value:,}",
-        annotation_position="top"
+    # 히스토그램
+    ax.hist(
+        historical_df[metric],
+        bins=30,
+        color='lightblue',
+        alpha=0.7,
+        edgecolor='white',
+        label='전체 데이터 분포'
     )
 
-    # 백분위수 선들 (25th, 50th, 75th)
+    # 현재 게시물 위치 (빨간 선)
+    ax.axvline(
+        selected_value,
+        color='red',
+        linestyle='--',
+        linewidth=2.5,
+        label=f'현재 게시물: {selected_value:,}'
+    )
+
+    # 백분위수 선들
     p25 = historical_df[metric].quantile(0.25)
     p50 = historical_df[metric].quantile(0.50)
     p75 = historical_df[metric].quantile(0.75)
 
-    fig.add_vline(x=p25, line_dash="dot", line_color="gray", opacity=0.5,
-                  annotation_text="25%", annotation_position="bottom left")
-    fig.add_vline(x=p50, line_dash="dot", line_color="gray", opacity=0.5,
-                  annotation_text="50%", annotation_position="bottom left")
-    fig.add_vline(x=p75, line_dash="dot", line_color="gray", opacity=0.5,
-                  annotation_text="75%", annotation_position="bottom left")
+    ax.axvline(p25, color='gray', linestyle=':', linewidth=1, alpha=0.7)
+    ax.axvline(p50, color='gray', linestyle=':', linewidth=1, alpha=0.7)
+    ax.axvline(p75, color='gray', linestyle=':', linewidth=1, alpha=0.7)
 
-    fig.update_layout(
-        title=title,
-        xaxis_title=metric,
-        yaxis_title='빈도',
-        template='plotly_white',
-        height=400,
-        showlegend=True
-    )
+    # 백분위수 텍스트 주석
+    y_max = ax.get_ylim()[1]
+    ax.text(p25, y_max * 0.95, '25%', ha='center', fontsize=9, color='gray')
+    ax.text(p50, y_max * 0.95, '50%', ha='center', fontsize=9, color='gray')
+    ax.text(p75, y_max * 0.95, '75%', ha='center', fontsize=9, color='gray')
 
+    ax.set_title(title, fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel(metric, fontsize=11)
+    ax.set_ylabel('빈도', fontsize=11)
+    ax.legend(frameon=True, shadow=True)
+    ax.grid(True, axis='y', alpha=0.3)
+
+    plt.tight_layout()
     return fig

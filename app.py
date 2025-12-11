@@ -4,6 +4,10 @@
 import streamlit as st
 from data.loader import get_cached_data
 from data.processor import preprocess_data
+from visualization.style_config import apply_default_style
+
+# Matplotlib 한글 폰트 및 스타일 초기화
+apply_default_style()
 
 # 페이지 설정
 st.set_page_config(

@@ -1,7 +1,8 @@
 streamlit
 pandas
 openpyxl
-plotly
 numpy
 scipy
 python-dateutil
+matplotlib
+seaborn

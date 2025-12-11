@@ -15,6 +15,7 @@ from analysis.benchmarking import (
 )
 from visualization.charts import create_impact_matrix, create_benchmark_position_chart
 from components.filters import render_date_filter, render_multiselect_filters, apply_filters
+import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="비교 분석", page_icon="🔍", layout="wide")
 
@@ -44,8 +45,9 @@ try:
     )
 
     df_with_zscore = calculate_zscore_matrix(df)
-    impact_chart = create_impact_matrix(df_with_zscore, color_by=color_by)
-    st.plotly_chart(impact_chart, use_container_width=True)
+    impact_fig = create_impact_matrix(df_with_zscore, color_by=color_by)
+    st.pyplot(impact_fig, use_container_width=True)
+    plt.close(impact_fig)
 
     # 사분면 통계
     col1, col2, col3, col4 = st.columns(4)
@@ -90,13 +92,14 @@ try:
             st.markdown("#### 조회수 분석")
 
             # 히스토그램 + 위치 표시
-            views_chart = create_benchmark_position_chart(
+            views_fig = create_benchmark_position_chart(
                 historical_df,
                 views_benchmark['value'],
                 '조회수',
                 '조회수 분포 및 현재 게시물 위치'
             )
-            st.plotly_chart(views_chart, use_container_width=True)
+            st.pyplot(views_fig, use_container_width=True)
+            plt.close(views_fig)
 
             # 메트릭 표시
             col1, col2, col3 = st.columns(3)
@@ -129,13 +132,14 @@ try:
             st.markdown("#### 댓글수 분석")
 
             # 히스토그램 + 위치 표시
-            comments_chart = create_benchmark_position_chart(
+            comments_fig = create_benchmark_position_chart(
                 historical_df,
                 comments_benchmark['value'],
                 '댓글수',
                 '댓글수 분포 및 현재 게시물 위치'
             )
-            st.plotly_chart(comments_chart, use_container_width=True)
+            st.pyplot(comments_fig, use_container_width=True)
+            plt.close(comments_fig)
 
             # 메트릭 표시
             col1, col2, col3 = st.columns(3)

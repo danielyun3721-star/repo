@@ -4,7 +4,7 @@
 import streamlit as st
 import sys
 import os
-import plotly.express as px
+import matplotlib.pyplot as plt
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -12,6 +12,7 @@ from data.loader import get_cached_data
 from data.processor import preprocess_data
 from analysis.efficiency import calculate_channel_efficiency, calculate_topic_performance, calculate_event_impact
 from visualization.charts import create_efficiency_scatter, create_topic_distribution_box, create_bar_chart
+from visualization.color_schemes import get_color_palette
 from components.filters import render_date_filter, render_multiselect_filters, apply_filters
 
 st.set_page_config(page_title="효율성 분석", page_icon="🎯", layout="wide")
@@ -33,18 +34,8 @@ with st.sidebar:
         index=0
     )
 
-# 색상 팔레트 매핑
-COLOR_SCHEMES = {
-    "기본 (Plotly)": px.colors.qualitative.Plotly,
-    "파스텔": px.colors.qualitative.Pastel,
-    "선명한 색상": px.colors.qualitative.Vivid,
-    "차분한 색상": px.colors.qualitative.Set2,
-    "무지개": px.colors.sequential.Rainbow,
-    "단색 (파랑)": px.colors.sequential.Blues,
-    "단색 (녹색)": px.colors.sequential.Greens
-}
-
-selected_colors = COLOR_SCHEMES[color_scheme]
+# 색상 팔레트 가져오기 (Matplotlib/Seaborn)
+selected_colors = get_color_palette(color_scheme, n_colors=10)
 
 st.title("🎯 채널 효율성 분석")
 st.markdown("배포 방식별, 주제별 성과를 분석합니다.")
@@ -70,9 +61,14 @@ try:
 
     # Views vs Comments 스캐터플롯
     st.subheader("📊 조회수 vs 댓글수 (채널 효율성)")
-    scatter_chart = create_efficiency_scatter(filtered_df, color_discrete_sequence=selected_colors)
-    st.plotly_chart(scatter_chart, use_container_width=True)
+    scatter_fig = create_efficiency_scatter(filtered_df, color_discrete_sequence=selected_colors)
+    st.pyplot(scatter_fig, use_container_width=True)
+    plt.close(scatter_fig)
     st.caption("💡 **원의 크기**: 좋아요수를 나타냅니다. 크기가 클수록 좋아요가 많습니다.")
+
+    # 호버 툴팁 대체: 상세 데이터 표시
+    with st.expander("📊 상세 데이터 보기"):
+        st.dataframe(filtered_df[['제목', '배포 방식', '조회수', '댓글수', '좋아요수']], use_container_width=True)
 
     st.markdown("---")
 
@@ -84,7 +80,7 @@ try:
         col1, col2 = st.columns(2)
 
         with col1:
-            bar1 = create_bar_chart(
+            bar1_fig = create_bar_chart(
                 channel_eff,
                 '배포_방식',
                 '평균_조회수',
@@ -92,10 +88,11 @@ try:
                 color_col='배포_방식',
                 color_discrete_sequence=selected_colors
             )
-            st.plotly_chart(bar1, use_container_width=True)
+            st.pyplot(bar1_fig, use_container_width=True)
+            plt.close(bar1_fig)
 
         with col2:
-            bar2 = create_bar_chart(
+            bar2_fig = create_bar_chart(
                 channel_eff,
                 '배포_방식',
                 '댓글_전환율',
@@ -103,7 +100,8 @@ try:
                 color_col='배포_방식',
                 color_discrete_sequence=selected_colors
             )
-            st.plotly_chart(bar2, use_container_width=True)
+            st.pyplot(bar2_fig, use_container_width=True)
+            plt.close(bar2_fig)
 
         with st.expander("배포 방식별 상세 데이터"):
             st.dataframe(channel_eff, use_container_width=True)
@@ -112,8 +110,9 @@ try:
 
     # 주제별 성과
     st.subheader("📚 주제별 조회수 분포")
-    topic_box = create_topic_distribution_box(filtered_df, color_discrete_sequence=selected_colors)
-    st.plotly_chart(topic_box, use_container_width=True)
+    topic_box_fig = create_topic_distribution_box(filtered_df, color_discrete_sequence=selected_colors)
+    st.pyplot(topic_box_fig, use_container_width=True)
+    plt.close(topic_box_fig)
 
     topic_perf = calculate_topic_performance(filtered_df)
     if not topic_perf.empty:

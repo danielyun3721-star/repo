@@ -230,11 +230,10 @@ def render_input_form(df):
                     with st.expander("추가된 데이터 확인"):
                         st.json(new_data)
 
-                    st.info("앱을 새로고침하면 업데이트된 데이터를 확인할 수 있습니다.")
+                    st.info("페이지가 자동으로 새로고침됩니다...")
 
-                    # 재실행 버튼
-                    if st.button("페이지 새로고침"):
-                        st.rerun()
+                    # 자동으로 페이지 새로고침
+                    st.rerun()
                 else:
                     st.error("데이터 추가 중 오류가 발생했습니다. 다시 시도해주세요.")
             else:
