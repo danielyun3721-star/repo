@@ -1,6 +1,6 @@
 """
 샘플 데이터 생성 스크립트
-raw_data.xlsx와 동일한 구조의 샘플 파일을 랜덤 데이터로 생성
+raw_data.txt와 동일한 구조의 샘플 파일을 랜덤 데이터로 생성
 """
 import pandas as pd
 import random
@@ -12,9 +12,9 @@ if sys.platform == 'win32':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-print("raw_data.xlsx 읽는 중...")
-# raw_data.xlsx 읽기 (실제 컬럼 구조 확인)
-df_original = pd.read_excel('raw_data.xlsx')
+print("raw_data.txt 읽는 중...")
+# raw_data.txt 읽기 (실제 컬럼 구조 확인)
+df_original = pd.read_csv('raw_data.txt', sep='\t', encoding='cp949')
 
 print(f"원본 파일 로드 완료: {len(df_original)}개 행, {len(df_original.columns)}개 컬럼")
 print(f"컬럼 목록: {list(df_original.columns)}")
@@ -89,8 +89,8 @@ for i in range(n_samples):
 df_sample = pd.DataFrame(sample_data)
 
 # 샘플 파일 저장
-output_file = 'sample_data.xlsx'
-df_sample.to_excel(output_file, index=False, engine='openpyxl')
+output_file = 'sample_data.txt'
+df_sample.to_csv(output_file, sep='\t', index=False, encoding='cp949')
 
 print(f"\n{output_file} 생성 완료!")
 print(f"   - {len(df_sample)}개 행")

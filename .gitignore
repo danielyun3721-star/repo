@@ -19,6 +19,7 @@ ENV/
 backups/
 logs/
 raw_data.xlsx
+raw_data.txt
 !sample_data.xlsx
 
 # 개인 파일

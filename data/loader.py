@@ -10,17 +10,35 @@ import config
 @st.cache_data(ttl=config.CACHE_TTL)
 def load_data():
     """
-    Excel 파일을 읽어 DataFrame 반환
+    TSV 파일을 읽어 DataFrame 반환
 
     Returns:
         pd.DataFrame: 로드된 데이터프레임
     """
     try:
-        df = pd.read_excel(config.DATA_PATH)
+        df = pd.read_csv(
+            config.DATA_PATH,
+            sep='\t',
+            encoding='cp949',
+            na_values=['', '-', 'nan', 'NaN', 'X']
+        )
         return df
     except FileNotFoundError:
         st.error(f"데이터 파일을 찾을 수 없습니다: {config.DATA_PATH}")
         return pd.DataFrame()
+    except UnicodeDecodeError:
+        # cp949 실패 시 utf-8 시도
+        try:
+            df = pd.read_csv(
+                config.DATA_PATH,
+                sep='\t',
+                encoding='utf-8',
+                na_values=['', '-', 'nan', 'NaN', 'X']
+            )
+            return df
+        except Exception as e:
+            st.error(f"데이터 로딩 중 인코딩 오류 발생: {str(e)}")
+            return pd.DataFrame()
     except Exception as e:
         st.error(f"데이터 로딩 중 오류 발생: {str(e)}")
         return pd.DataFrame()

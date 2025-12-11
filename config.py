@@ -5,7 +5,7 @@ import os
 
 # 경로 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, 'raw_data.xlsx')
+DATA_PATH = os.path.join(BASE_DIR, 'raw_data.txt')
 BACKUP_DIR = os.path.join(BASE_DIR, 'backups')
 
 # 컬럼 매핑 (원본 → 사용)

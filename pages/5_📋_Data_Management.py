@@ -21,7 +21,7 @@ st.markdown("---")
 # 안내 메시지
 st.warning("""
 ⚠️ **주의사항**
-- 데이터 수정 시 자동으로 Excel 파일에 반영됩니다
+- 데이터 수정 시 자동으로 TSV 파일에 반영됩니다
 - 모든 변경사항은 로그로 기록되며 백업 파일이 생성됩니다
 - 삭제된 데이터는 복구할 수 없으니 신중하게 수정하세요
 """)
@@ -146,10 +146,10 @@ try:
                 if backup_path:
                     st.success(f"✅ 백업 생성: {os.path.basename(backup_path)}")
 
-                # Excel 파일 업데이트
+                # TSV 파일 업데이트
                 try:
                     # 전체 데이터에 변경사항 반영 (간단한 방법: 전체 데이터 교체)
-                    edited_df.to_excel(config.DATA_PATH, index=False, engine='openpyxl')
+                    edited_df.to_csv(config.DATA_PATH, sep='\t', index=False, encoding='cp949')
 
                     # 변경 로그 기록
                     log_file = log_change(df_filtered, edited_df)

@@ -21,7 +21,7 @@ def create_backup():
             os.makedirs(config.BACKUP_DIR)
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        backup_filename = f"raw_data_backup_{timestamp}.xlsx"
+        backup_filename = f"raw_data_backup_{timestamp}.txt"
         backup_path = os.path.join(config.BACKUP_DIR, backup_filename)
 
         shutil.copy2(config.DATA_PATH, backup_path)
@@ -48,14 +48,14 @@ def append_new_data(new_data):
             st.info(f"백업 파일 생성: {os.path.basename(backup_path)}")
 
         # 기존 데이터 읽기
-        df = pd.read_excel(config.DATA_PATH)
+        df = pd.read_csv(config.DATA_PATH, sep='\t', encoding='cp949')
 
         # 새 행 추가
         new_row = pd.DataFrame([new_data])
         df = pd.concat([df, new_row], ignore_index=True)
 
-        # Excel 저장
-        df.to_excel(config.DATA_PATH, index=False, engine='openpyxl')
+        # TSV 저장
+        df.to_csv(config.DATA_PATH, sep='\t', index=False, encoding='cp949')
 
         return True
     except Exception as e:
@@ -79,15 +79,15 @@ def update_existing_data(index, updated_data):
         create_backup()
 
         # 기존 데이터 읽기
-        df = pd.read_excel(config.DATA_PATH)
+        df = pd.read_csv(config.DATA_PATH, sep='\t', encoding='cp949')
 
         # 데이터 수정
         for key, value in updated_data.items():
             if key in df.columns:
                 df.loc[index, key] = value
 
-        # Excel 저장
-        df.to_excel(config.DATA_PATH, index=False, engine='openpyxl')
+        # TSV 저장
+        df.to_csv(config.DATA_PATH, sep='\t', index=False, encoding='cp949')
 
         return True
     except Exception as e:
@@ -110,14 +110,14 @@ def delete_data(index):
         create_backup()
 
         # 기존 데이터 읽기
-        df = pd.read_excel(config.DATA_PATH)
+        df = pd.read_csv(config.DATA_PATH, sep='\t', encoding='cp949')
 
         # 데이터 삭제
         df = df.drop(index)
         df = df.reset_index(drop=True)
 
-        # Excel 저장
-        df.to_excel(config.DATA_PATH, index=False, engine='openpyxl')
+        # TSV 저장
+        df.to_csv(config.DATA_PATH, sep='\t', index=False, encoding='cp949')
 
         return True
     except Exception as e:
